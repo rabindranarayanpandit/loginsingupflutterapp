@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:loginsingupflutterapp/screens/login.dart';
+import 'package:loginsingupflutterapp/util/validation.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
@@ -11,7 +11,15 @@ class ForgotPassword extends StatefulWidget {
 
 class _ForgotPasswordState extends State<ForgotPassword> {
   TextEditingController nameController = TextEditingController();
-  bool isValidUserName = false;
+  final _formKey = GlobalKey<FormState>();
+  String? email;
+  bool? autoValidate = false;
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,8 +30,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           title: const Text('Forgot Password'),
           centerTitle: true,
         ),
-        body: Container(
-            padding: const EdgeInsets.all(10),
+        body: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(children: <Widget>[
               Container(
                   alignment: Alignment.center,
@@ -38,14 +47,14 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               Container(
                 margin: const EdgeInsets.only(top: 30.0),
                 padding: const EdgeInsets.all(10),
-                child: TextField(
+                child: TextFormField(
+                  autofocus: false,
                   controller: nameController,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: 'Email',
-                    errorText:
-                        isValidUserName ? 'Please enter your email' : null,
-                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: AuthValidators.validateEmail,
+                  onSaved: (value) => email = value,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(), labelText: 'Email'),
                 ),
               ),
               Container(
@@ -56,16 +65,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 child: ElevatedButton(
                     child: const Text('Submit'),
                     onPressed: () {
-                      if (nameController.text.isNotEmpty) {
+                      if (_formKey.currentState!.validate()) {
                         Navigator.pop(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const Login()));
                       } else {
                         setState(() {
-                          nameController.text.isEmpty
-                              ? isValidUserName = true
-                              : isValidUserName = false;
+                          // validation error
+                          autoValidate = true;
                         });
                       }
                     }),

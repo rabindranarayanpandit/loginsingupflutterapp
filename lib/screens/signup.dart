@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loginsingupflutterapp/screens/login.dart';
+import 'package:loginsingupflutterapp/util/validation.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -12,16 +13,28 @@ class _SignUpState extends State<SignUp> {
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmpasswordController = TextEditingController();
-  bool isValidUserName = false;
-  bool isValidPassWord = false;
-  bool isConfirmPassword = false;
+  final _formKey = GlobalKey<FormState>();
+  String? email;
+  String? password;
+  String? confPassword;
+  bool passwordVisible = false;
+  bool confirmPasswordVisible = false;
+  bool? autoValidate = false;
+
+  @override
+  void initState() {
+    super.initState();
+    passwordVisible = true;
+    confirmPasswordVisible = true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Sign Up'), centerTitle: true),
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: ListView(
+      body: Form(
+        key: _formKey,
+        child: Column(
           children: <Widget>[
             Container(
                 alignment: Alignment.center,
@@ -35,39 +48,76 @@ class _SignUpState extends State<SignUp> {
                 )),
             Container(
               padding: const EdgeInsets.all(10),
-              child: TextField(
+              child: TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                autofocus: false,
                 controller: nameController,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
+                keyboardType: TextInputType.emailAddress,
+                validator: AuthValidators.validateEmail,
+                onSaved: (value) => email = value,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
                   labelText: 'Email',
-                  errorText: isValidUserName ? 'Please enter your email' : null,
                 ),
               ),
             ),
             Container(
               padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-              child: TextField(
-                obscureText: true,
+              child: TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                autofocus: false,
+                obscureText: passwordVisible,
                 controller: passwordController,
+                keyboardType: TextInputType.visiblePassword,
+                validator: AuthValidators.validatePassword,
+                onSaved: (value) => password = value,
+                textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
                     border: const OutlineInputBorder(),
                     labelText: 'Password',
-                    errorText:
-                        isValidPassWord ? 'Please enter your password' : null),
+                    suffixIcon: IconButton(
+                      icon: Icon(passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                      onPressed: () {
+                        setState(
+                          () {
+                            passwordVisible = !passwordVisible;
+                          },
+                        );
+                      },
+                    )),
               ),
             ),
             Container(
               margin: const EdgeInsets.only(top: 15.0),
               padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-              child: TextField(
-                obscureText: true,
+              child: TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                autofocus: false,
+                obscureText: confirmPasswordVisible,
                 controller: confirmpasswordController,
+                validator: (value) => AuthValidators.confirmPassword(
+                    value, passwordController.text),
+                onSaved: (value) => confPassword = value,
+                textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: 'Confirm Password',
-                    errorText: isConfirmPassword
-                        ? 'Please confirm your password'
-                        : null),
+                  border: const OutlineInputBorder(),
+                  labelText: 'Confirm Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(confirmPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off),
+                    onPressed: () {
+                      setState(
+                        () {
+                          confirmPasswordVisible = !confirmPasswordVisible;
+                        },
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
             Container(
@@ -77,23 +127,14 @@ class _SignUpState extends State<SignUp> {
                 child: ElevatedButton(
                   child: const Text('Sign Up'),
                   onPressed: () {
-                    if (nameController.text.isNotEmpty &&
-                        passwordController.text.isNotEmpty) {
+                    if (_formKey.currentState!.validate()) {
                       Navigator.pop(
                           context,
                           MaterialPageRoute(
                               builder: (context) => const Login()));
                     } else {
                       setState(() {
-                        nameController.text.isEmpty
-                            ? isValidUserName = true
-                            : isValidUserName = false;
-                        passwordController.text.isEmpty
-                            ? isValidPassWord = true
-                            : isValidPassWord = false;
-                        confirmpasswordController.text.isEmpty
-                            ? isConfirmPassword = true
-                            : isConfirmPassword = false;
+                        autoValidate = true;
                       });
                     }
                   },

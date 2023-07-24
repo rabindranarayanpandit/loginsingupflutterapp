@@ -12,12 +12,19 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  int id = 0;
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String? email;
   String? password;
+  bool passwordVisible = false;
   bool? autoValidate = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -31,15 +38,12 @@ class _LoginState extends State<Login> {
     return Scaffold(
       body: Container(
         margin: const EdgeInsets.all(10.0),
-        child: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.always,
-            child: formUI()),
+        child: Form(key: _formKey, child: formUI(context)),
       ),
     );
   }
 
-  Widget formUI() {
+  Widget formUI(BuildContext context) {
     return Column(
       children: <Widget>[
         Container(
@@ -62,10 +66,11 @@ class _LoginState extends State<Login> {
         Container(
           padding: const EdgeInsets.all(10),
           child: TextFormField(
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             keyboardType: TextInputType.emailAddress,
             autofocus: false,
             controller: nameController,
-            validator: validateEmail,
+            validator: AuthValidators.validateEmail,
             onSaved: (value) => email = value,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
@@ -76,15 +81,27 @@ class _LoginState extends State<Login> {
         Container(
           padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           child: TextFormField(
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             autofocus: false,
             obscureText: true,
             controller: passwordController,
-            validator: validatePassword,
+            validator: AuthValidators.validatePassword,
             onSaved: (value) => password = value,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Password',
-            ),
+            decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: 'Password',
+                suffixIcon: IconButton(
+                  icon: Icon(passwordVisible
+                      ? Icons.visibility
+                      : Icons.visibility_off),
+                  onPressed: () {
+                    setState(
+                      () {
+                        passwordVisible = !passwordVisible;
+                      },
+                    );
+                  },
+                )),
           ),
         ),
         TextButton(
@@ -101,21 +118,27 @@ class _LoginState extends State<Login> {
         ),
         Container(
             height: 50,
+            width: 300,
             padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
             child: ElevatedButton(
               child: const Text('Login'),
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
+                  //Navigator.pushNamed(context, const HomeScreen() as String);
+
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const HomeScreen()));
-                  nameController.clear();
-                  passwordController.clear();
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HomeScreen()))
+                      .then((value) => setState(() {
+                            _formKey.currentState!.reset();
+                            FocusScope.of(context).requestFocus(FocusNode());
+                          }));
                 } else {
                   setState(() {
                     // validation error
-                    autoValidate = true;
+                    _formKey.currentState!.reset();
+                    //autoValidate = true;
                   });
                 }
               },
