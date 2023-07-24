@@ -134,12 +134,6 @@ class _LoginState extends State<Login> {
                             _formKey.currentState!.reset();
                             FocusScope.of(context).requestFocus(FocusNode());
                           }));
-                } else {
-                  setState(() {
-                    // validation error
-                    _formKey.currentState!.reset();
-                    //autoValidate = true;
-                  });
                 }
               },
             )),
