@@ -20,141 +20,147 @@ class _LoginState extends State<Login> {
   String? password;
   bool passwordVisible = false;
   bool? autoValidate = false;
-
   @override
   void initState() {
     super.initState();
+    passwordVisible = true;
   }
 
   @override
   void dispose() {
     nameController.dispose();
     passwordController.dispose();
+    FocusNode().dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        margin: const EdgeInsets.all(10.0),
-        child: Form(key: _formKey, child: formUI(context)),
-      ),
-    );
-  }
-
-  Widget formUI(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.all(10),
-            child: const Text(
-              'TechSkill',
-              style: TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 30),
-            )),
-        Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.all(10),
-            child: const Text(
-              'Welcome',
-              style: TextStyle(fontSize: 20),
-            )),
-        Container(
-          padding: const EdgeInsets.all(10),
-          child: TextFormField(
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            keyboardType: TextInputType.emailAddress,
-            autofocus: false,
-            controller: nameController,
-            validator: AuthValidators.validateEmail,
-            onSaved: (value) => email = value,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Email',
-            ),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-          child: TextFormField(
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            autofocus: false,
-            obscureText: true,
-            controller: passwordController,
-            validator: AuthValidators.validatePassword,
-            onSaved: (value) => password = value,
-            decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: 'Password',
-                suffixIcon: IconButton(
-                  icon: Icon(passwordVisible
-                      ? Icons.visibility
-                      : Icons.visibility_off),
+        body: Form(
+            key: _formKey,
+            child: Column(
+              children: <Widget>[
+                Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(10),
+                    child: const Text(
+                      'TechSkill',
+                      style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 30),
+                    )),
+                Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(10),
+                    child: const Text(
+                      'Welcome',
+                      style: TextStyle(fontSize: 20),
+                    )),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  child: TextFormField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    keyboardType: TextInputType.emailAddress,
+                    autofocus: false,
+                    controller: nameController,
+                    validator: AuthValidators.validateEmail,
+                    onChanged: (value) => setState(() => email = value),
+                    // onChanged: (value) => email = value,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Email',
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: TextFormField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    autofocus: false,
+                    obscureText: passwordVisible,
+                    controller: passwordController,
+                    validator: AuthValidators.validatePassword,
+                    onChanged: (value) => setState(() => password = value),
+                    //onChanged: (value) => password = value,
+                    decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: 'Password',
+                        suffixIcon: IconButton(
+                          icon: Icon(passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                          onPressed: () {
+                            setState(
+                              () {
+                                passwordVisible = !passwordVisible;
+                              },
+                            );
+                          },
+                        )),
+                  ),
+                ),
+                TextButton(
                   onPressed: () {
-                    setState(
-                      () {
-                        passwordVisible = !passwordVisible;
-                      },
-                    );
+                    //forgot password screen
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ForgotPassword()));
                   },
-                )),
-          ),
-        ),
-        TextButton(
-          onPressed: () {
-            //forgot password screen
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const ForgotPassword()));
-          },
-          child: const Text(
-            'Forgot Password',
-          ),
-        ),
-        Container(
-            height: 50,
-            width: 300,
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child: ElevatedButton(
-              child: const Text('Login'),
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  //Navigator.pushNamed(context, const HomeScreen() as String);
-
-                  Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomeScreen()))
-                      .then((value) => setState(() {
-                            _formKey.currentState!.reset();
-                            FocusScope.of(context).requestFocus(FocusNode());
-                          }));
-                }
-              },
-            )),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Does not have account?'),
-            TextButton(
-              child: const Text(
-                'Register',
-                style: TextStyle(fontSize: 20),
-              ),
-              onPressed: () {
-                //signup screen
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const SignUp()));
-              },
-            )
-          ],
-        ),
-      ],
-    );
+                  child: const Text(
+                    'Forgot Password',
+                  ),
+                ),
+                Container(
+                    height: 50,
+                    width: 300,
+                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                    child: ElevatedButton(
+                      child: const Text('Login'),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          HomeScreen(_formKey)))
+                              .then((value) => setState(() {
+                                    _formKey.currentState?.reset();
+                                    nameController.text = "";
+                                    passwordController.text = "";
+                                    FocusManager.instance.primaryFocus
+                                        ?.unfocus();
+                                  }));
+                        } else {
+                          setState(() {
+                            autoValidate = true;
+                          });
+                        }
+                      },
+                    )),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const Text('Does not have account?'),
+                    TextButton(
+                      child: const Text(
+                        'Sign Up',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      onPressed: () {
+                        //signup screen
+                        Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => SignUp(_formKey)))
+                            .then((_) => _formKey.currentState!.reset());
+                      },
+                    )
+                  ],
+                ),
+              ],
+            )));
   }
 }

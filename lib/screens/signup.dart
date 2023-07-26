@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:loginsingupflutterapp/screens/login.dart';
 import 'package:loginsingupflutterapp/util/validation.dart';
 
 class SignUp extends StatefulWidget {
-  const SignUp({super.key});
+  final GlobalKey<FormState> loginScreenFormKey;
+  const SignUp(this.loginScreenFormKey, {super.key});
 
   @override
   State<SignUp> createState() => _SignUpState();
 }
 
 class _SignUpState extends State<SignUp> {
+  final _formKeySignUp = GlobalKey<FormState>();
+  void _processData() {
+    // Process your data and upload to server
+    _formKeySignUp.currentState?.reset();
+    widget.loginScreenFormKey.currentState?.reset();
+    Navigator.pop(context);
+  }
+
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmpasswordController = TextEditingController();
@@ -123,15 +131,17 @@ class _SignUpState extends State<SignUp> {
             Container(
                 margin: const EdgeInsets.only(top: 40.0),
                 height: 50,
-                padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+                width: 300,
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: ElevatedButton(
                   child: const Text('Sign Up'),
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      Navigator.pop(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Login()));
+                      _processData();
+                      // Navigator.pop(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) => const Login()));
                     } else {
                       setState(() {
                         autoValidate = true;
